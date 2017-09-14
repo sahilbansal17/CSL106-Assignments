@@ -1,22 +1,29 @@
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 using namespace std;
 
 int hashTable[1000]={0};
 
-int hashF(string s)
+int hashF(char*s)
 {
-	int len = s.length(),index=0;
-	for(int i=0;i<len;i++)
+	int index=0;
+	for(int i=0;s[i]!='\0';i++)
 	{
-		if(s[i]>=97 && s[i]<=122)
-			index+=(s[i]-97);
-		else 
-			index+=(s[i]-65);
-		//to ensure that capitalization makes no difference 
+		index += s[i]-97+1;
 	}
 	return (index)%1000;
+}
+
+
+void toLower(char*s)
+{
+	for(int i=0;s[i]!='\0';i++)
+	{
+		if(s[i]>=65 && s[i]<=90)
+			s[i]=s[i]+32; 
+	}
 }
 
 int main()
@@ -33,26 +40,42 @@ int main()
 
 	ifstream fin("input.txt"); //to read from a file input.txt
 
-	string s; //take input word by word from file
+	char* s; //take input word by word from file
+	s = new char[100];
+
+	char delim[] = "! ,.\"#$%&()*+-/:;<>=?@[]\\^_{}|~";
+
 	while(!fin.eof())
 	{
 		fin>>s;
-		hashValue = hashF(s);
-		hashTable[hashValue]++;
+		char* modifiedS = strtok(s,delim);
+		while(modifiedS)
+    	{
+    		toLower(modifiedS);
+        	hashValue = hashF(modifiedS);
+			hashTable[hashValue]++;
+        	modifiedS = strtok(NULL,delim);
+    	}	
 	}
-
 	fin.close();
 
 	ifstream fin2("input.txt"); //again reading to print the count 
-	while(!fin2.eof())
+	while(!fin2.eof()) 
 	{
 		fin2>>s;
-		hashValue = hashF(s); 
-		if(hashTable[hashValue] > 0)
-		{
-			cout<<s<<":"<<hashTable[hashValue]<<endl;
-			hashTable[hashValue]=0;
-		}
+		char* modifiedS = strtok(s,delim);
+		while(modifiedS)
+    	{
+    		toLower(modifiedS);
+        	hashValue = hashF(modifiedS);
+			if(hashTable[hashValue] > 0)
+			{
+				cout<<modifiedS<<":"<<hashTable[hashValue]<<endl;
+				hashTable[hashValue]=0;
+			}
+        	modifiedS = strtok(NULL,delim);
+    	}	
+		
 	}
 	fin2.close();
 	return 0 ; 

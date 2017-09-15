@@ -34,6 +34,33 @@ void toLower(char*s)
 	}
 }
 
+
+void copy(int hashValue,char* modifiedS)
+{
+	int k = 0;
+	hashTable[hashValue].word = new char[101];
+    while(modifiedS[k]!='\0')
+    {
+       	hashTable[hashValue].word[k]=modifiedS[k];
+        k++;
+    }
+    hashTable[hashValue].word[k]='\0';
+}
+
+void linearProbe(int probe, char* data)
+{
+	int flag = 0; //it will become 1 when we find an empty location
+    while(flag==0)
+    {
+        probe++;
+        if(hashTable[probe].count==0) //when that location in hashtable is empty
+        {
+        	copy(probe,data);
+        	hashTable[probe].count++;
+        	flag = 1;
+        }
+    }
+}
 int main()
 {
 
@@ -63,16 +90,18 @@ int main()
         	hashValue = hashF(modifiedS);
         	if(hashTable[hashValue].count==0) //to store the word if it has not been visited earlier
         	{
-        		int k = 0;
-        		hashTable[hashValue].word = new char[101];
-        		while(modifiedS[k]!='\0')
-        		{
-        			hashTable[hashValue].word[k]=modifiedS[k];
-        			k++;
-        		}
-        		hashTable[hashValue].word[k]='\0';
+        		copy(hashValue,modifiedS);
+        		hashTable[hashValue].count++; //increment the count of that word to 1
         	}
-			hashTable[hashValue].count++; //increment the count of that word
+        	else if(strcmp(hashTable[hashValue].word,modifiedS)==0)
+			{
+				hashTable[hashValue].count++; //since same word is stored we can increment its count
+        	}
+        	else
+        	{
+        		//this refers to the case of a collision 
+        		linearProbe(hashValue,modifiedS);//resolving using linear probing
+        	} 
         	modifiedS = strtok(NULL,delim); 
     	}	
 	}

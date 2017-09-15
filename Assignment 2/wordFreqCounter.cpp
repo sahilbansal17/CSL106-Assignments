@@ -71,7 +71,7 @@ int main()
 	ASCII(') = 39*/ 
 	hashTable[size].count=0; //intialize the count 
 
-	int hashValue;
+	int hashValue, totalWords = 0 ;
 
 	ifstream fin("input.txt"); //to read from a file input.txt
 
@@ -102,6 +102,7 @@ int main()
         		//this refers to the case of a collision 
         		linearProbe(hashValue,modifiedS);//resolving using linear probing
         	} 
+        	totalWords ++ ;
         	modifiedS = strtok(NULL,delim); 
     	}	
 	}
@@ -128,11 +129,48 @@ int main()
 	fin2.close();*/
 
 	//no need to read from file now as we also store the keys in HT
+
+	int th; //threshold value
+	cout<<"Please enter the threshold value: ";
+	cin>>th;
+
+	cout<<"The total words in the file are: "<<totalWords<<endl;
+
+
+	//creating another hashtable which will store only those words whose count is more than the threshold
+	struct hT thresholdHT[totalWords];
+	int id = 0, reqW = 0;
 	for(int i=0;i<size;i++)
 	{
-		if(hashTable[i].count!=0)
-			cout<<hashTable[i].word<<":"<<hashTable[i].count<<endl;
+		if(hashTable[i].count>th)
+		{
+			reqW ++; //increment count of those words which are greater than threshold
+			int k = 0;
+			thresholdHT[id].word = new char[101];
+    		//copying the word at ith index in hashTable to word at id index in thresholdHT
+    		while(hashTable[i].word[k]!='\0')
+    		{
+       			thresholdHT[id].word[k]=hashTable[i].word[k];
+        		k++;
+    		}
+    		thresholdHT[id].word[k]='\0';
+			thresholdHT[id].count = hashTable[i].count;
+			id++;
+		}
 	}
+
+	if(reqW>0)
+	{
+		cout<<"The words having frequency more than threshold ("<<reqW<<") are:"<<endl;
+		for(int i=0;i<reqW;i++)
+		{
+			cout<<thresholdHT[i].word<<":"<<thresholdHT[i].count<<endl;
+		}
+	}
+	else
+		cout<<"No such words exist.";
+
+
 	return 0 ; 
 
 }

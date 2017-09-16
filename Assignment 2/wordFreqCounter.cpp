@@ -1,10 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <math.h>
 
 using namespace std;
 
-#define size 10000 //size of the hashTable
+#define size 55219 //size of the hashTable
 
 //implementation in which we also store the word in the hashtable
 struct hT{
@@ -17,9 +18,11 @@ struct hT{
 int hashF(char*s)
 {
 	int index=0;
+	int a = 2;
 	for(int i=0;s[i]!='\0';i++)
 	{
-		index += abs(s[i]-97+1); //since it returned -ve index in case of apostrophe
+		index += a*abs(s[i]-97+1);
+		a*=2;
 	}
 	return (index)%size;
 }
@@ -46,18 +49,20 @@ void copy(struct hT a[],int hashValue,char* modifiedS)
     a[hashValue].word[k]='\0';
 }
 
-void linearProbe(int probe, char* data)
+void QuadProbe(int probe, char* data)
 {
+	int k = 1;
 	int flag = 0; //it will become 1 when we find an empty location
     while(flag==0)
     {
-        probe++;
+        probe=(probe+k*k)%size;
         if(hashTable[probe].count==0) //when that location in hashtable is empty
         {
         	copy(hashTable,probe,data);
         	hashTable[probe].count++;
         	flag = 1;
         }
+        k++;
     }
 }
 
@@ -131,11 +136,9 @@ int main()
         	else
         	{
         		//this refers to the case of a collision 
-        		linearProbe(hashValue,modifiedS);//resolving using linear probing
+        		QuadProbe(hashValue,modifiedS);//resolving using linear probing
         		totalWords ++ ;
         	}
-
-        	
         	modifiedS = strtok(NULL,delim); 
     	}	
 	}

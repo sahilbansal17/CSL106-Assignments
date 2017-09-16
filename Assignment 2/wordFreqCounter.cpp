@@ -99,12 +99,6 @@ void quick_sort(hT A[],int beg,int end)
 }
 int main()
 {
-
-
-	/*printing ascii value of apostrophe 
-	char ch = '\'';
-	cout<<int(ch)<<endl; 
-	ASCII(') = 39*/ 
 	hashTable[size].count=0; //intialize the count 
 
 	int hashValue, totalWords = 0 ; //totalWords now refers to the distinct words in the file
@@ -146,28 +140,6 @@ int main()
     	}	
 	}
 	fin.close();
-
-	/*ifstream fin2("input.txt"); //again reading to print the count 
-	while(!fin2.eof()) 
-	{
-		fin2>>s;
-		char* modifiedS = strtok(s,delim);
-		while(modifiedS)
-    	{
-    		toLower(modifiedS);
-        	hashValue = hashF(modifiedS);
-			if(hashTable[hashValue].count > 0) //so that the next time same string should not get printed
-			{
-				cout<<modifiedS<<":"<<hashTable[hashValue].count<<endl;
-				hashTable[hashValue].count=0; //reset its value 
-			}
-        	modifiedS = strtok(NULL,delim);
-    	}	
-		
-	}
-	fin2.close();*/
-
-	//no need to read from file now as we also store the keys in HT
 
 	int th; //threshold value
 	cout<<"Please enter the threshold value: ";

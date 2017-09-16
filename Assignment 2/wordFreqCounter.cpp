@@ -34,17 +34,16 @@ void toLower(char*s)
 	}
 }
 
-
-void copy(int hashValue,char* modifiedS)
-{
+void copy(struct hT a[],int hashValue,char* modifiedS)
+{   	
 	int k = 0;
-	hashTable[hashValue].word = new char[256];
+	a[hashValue].word = new char[256];
     while(modifiedS[k]!='\0')
     {
-       	hashTable[hashValue].word[k]=modifiedS[k];
+       	a[hashValue].word[k]=modifiedS[k];
         k++;
     }
-    hashTable[hashValue].word[k]='\0';
+    a[hashValue].word[k]='\0';
 }
 
 void linearProbe(int probe, char* data)
@@ -55,7 +54,7 @@ void linearProbe(int probe, char* data)
         probe++;
         if(hashTable[probe].count==0) //when that location in hashtable is empty
         {
-        	copy(probe,data);
+        	copy(hashTable,probe,data);
         	hashTable[probe].count++;
         	flag = 1;
         }
@@ -127,7 +126,7 @@ int main()
         	hashValue = hashF(modifiedS);
         	if(hashTable[hashValue].count==0) //to store the word if it has not been visited earlier
         	{
-        		copy(hashValue,modifiedS);
+        		copy(hashTable,hashValue,modifiedS);
         		hashTable[hashValue].count++; //increment the count of that word to 1
         		totalWords ++ ;
         	}
@@ -172,7 +171,7 @@ int main()
 
 	int th; //threshold value
 	cout<<"Please enter the threshold value: ";
-	th = 0;
+	cin>>th;
 
 	cout<<"The total words in the file are: "<<totalWords<<endl;
 
@@ -185,15 +184,7 @@ int main()
 		if(hashTable[i].count>th)
 		{
 			reqW ++; //increment count of those words which are greater than threshold
-			int k = 0;
-			thresholdHT[id].word = new char[256];
-    		//copying the word at ith index in hashTable to word at id index in thresholdHT
-    		while(hashTable[i].word[k]!='\0')
-    		{
-       			thresholdHT[id].word[k]=hashTable[i].word[k];
-        		k++;
-    		}
-    		thresholdHT[id].word[k]='\0';
+			copy(thresholdHT,id,hashTable[i].word); //copying the word at ith index in hashTable to word at id index in thresholdHT
 			thresholdHT[id].count = hashTable[i].count;
 			id++;
 		}

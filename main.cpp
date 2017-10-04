@@ -9,8 +9,12 @@ private:
     binarySearchTree *right;
 public:
     binarySearchTree() {
+        salary = -1;
+        left = NULL;
+        right = NULL;
         return;
     }
+
     binarySearchTree(int data) {
         salary = data;
         left = NULL;
@@ -19,23 +23,27 @@ public:
 
     void insert(int data) {
         binarySearchTree *b = this;
-        while (b) {
-            if (data <= b->salary) {
-                if (b->left)
-                    b = b->left;
-                else {
-                    b->left = new binarySearchTree(data);
-                    break;
-                }
-            } else {
-                if (b->right)
-                    b = b->right;
-                else {
-                    b->right = new binarySearchTree(data);
-                    break;
+        if (b ==
+            NULL) { //there's some mistake here since this can never be null, that's why unable to insert the first element
+            b = new binarySearchTree(data);
+        } else
+            while (b) {
+                if (data <= b->salary) {
+                    if (b->left)
+                        b = b->left;
+                    else {
+                        b->left = new binarySearchTree(data);
+                        break;
+                    }
+                } else {
+                    if (b->right)
+                        b = b->right;
+                    else {
+                        b->right = new binarySearchTree(data);
+                        break;
+                    }
                 }
             }
-        }
     }
 
     binarySearchTree *insert(binarySearchTree *b, int data) {
@@ -61,6 +69,7 @@ public:
             this->right->inOrder();
     }
 
+    //still some bugs to be fixed in this
     void remove(int data) {
         binarySearchTree *b = this;
         binarySearchTree *parent = this;
@@ -133,54 +142,65 @@ public:
         }
         return b;
     }
+
+    binarySearchTree *remove(binarySearchTree *b, int data) {
+        binarySearchTree *temp;
+        if (b == NULL) {
+            cout << "Element not present in the BST\n";
+        } else if (data < b->salary) {
+            b->left = remove(b->left, data);
+        } else if (data > b->salary) {
+            b->right = remove(b->right, data);
+        } else {
+            //the case when element is found
+            //case 1: it has two children
+            if (b->left && b->right) {
+                //swap the element with the predecessor
+                temp = b->predecessor();
+                b->salary = temp->salary;
+                //now delete the predecessor
+                b->left = remove(b->left, b->salary);
+            } else {
+                //case 2: it has one child or even no child
+                temp = b;
+                if (b->left == NULL) {
+                    b = b->right;
+                } else if (b->right == NULL) {
+                    b = b->left;
+                }
+                delete temp; //handles both cases
+            }
+        }
+        return b;
+    }
+
 };
+
+void insertUsingArr(binarySearchTree *&b, int a[], int start, int end) {
+    if (start > end)
+        return;
+    int mid = (start + end) / 2;
+    b = b->insert(b, a[mid]);
+    insertUsingArr(b, a, start, mid - 1);
+    insertUsingArr(b, a, mid + 1, end);
+}
 
 int main() {
 
-    /* binarySearchTree b(5);
-     b.insert(6);
-     b.insert(6);
-     b.insert(3);
-     b.insert(9);
-     cout<<"Inorder Traversal : ";
-     b.inOrder();
-
-     b.remove(9);
-     cout<<"\nAfter removing 9 : ";
-     b.inOrder();
-
-     b.remove(6);
-     cout<<"\nAfter removing 6 : ";
-     b.inOrder();
-
-     b.remove(5);
-     cout<<"\nAfter removing 5 : ";
-     b.inOrder();
-
-     binarySearchTree *b_ptr = new binarySearchTree(10);
-     b_ptr->insert(b_ptr, 5);
-     b_ptr->insert(b_ptr, 15);
-     cout << "\nUsing pointer method: ";
-     b_ptr->inOrder();
-     b_ptr->remove(15);
-     cout << "\nAfter deleting 15: ";
-     b_ptr->inOrder(); */
-
-    binarySearchTree *c = new binarySearchTree(5);
-    c->insert(8);
-    c->insert(7);
-    c->insert(9);
-    c->inOrder();
+    int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int n = sizeof(a) / sizeof(int);
+    binarySearchTree *bst = NULL; // to make sure it is not uninitialized
+    insertUsingArr(bst, a, 0, n - 1);
+    bst->inOrder();
+    bst = bst->remove(bst, 5);
     cout << endl;
-    c->remove(8);
-    c->inOrder();
+    bst->inOrder();
+    bst = bst->remove(bst, 3);
     cout << endl;
-    c->remove(7);
-    c->inOrder();
+    bst->inOrder();
+    bst = bst->remove(bst, 2);
     cout << endl;
-    /*binarySearchTree* d = &c;
-    d = new binarySearchTree(5);
-    delete d;
-    c.inOrder();*/
+    bst->inOrder();
+
     return 0;
 }

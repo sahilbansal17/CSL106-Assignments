@@ -185,9 +185,160 @@ void insertUsingArr(binarySearchTree *&b, int a[], int start, int end) {
     insertUsingArr(b, a, mid + 1, end);
 }
 
+class RBTree {
+public:
+    int salary;
+    RBTree *left;
+    RBTree *right;
+    RBTree *parent;
+    int color; //0 for BLACK and 1 for RED
+public:
+    RBTree() {
+        salary = 0;
+        left = NULL;
+        right = NULL;
+        parent = NULL;
+        color = 0;
+    }
+
+    RBTree(int data, int col) {
+        //by default when we insert a node its color is RED
+        salary = data;
+        left = NULL;
+        right = NULL;
+        parent = NULL;
+        color = col;
+    }
+
+    RBTree *insert(RBTree *rb, int data) {
+        if (!rb) {
+            rb = new RBTree(data, 1);
+            /*now it might create a double RED problem if its
+              parent is RED  */
+            return rb;
+
+        }
+        if (data <= rb->salary) {
+            //no new node is created
+            if (rb->left || rb->color == 0) {
+                rb->left = insert(rb->left, data);
+                rb->left->parent = rb;
+            } else if (rb->color == 1) {
+                //the case when a double RED problem occurs
+                rb->left = insert(rb->left, data);
+                rb->left->parent = rb;
+
+                //parent of rb must be BLACK
+                RBTree *otherChild; //otherChild of parent of rb
+                if (rb->parent->left == rb)
+                    otherChild = rb->parent->right;
+                else
+                    otherChild = rb->parent->left;
+                fixDRed(rb, rb->parent, otherChild, 1);
+                //1 refers that new element is inserted at left of rb
+            }
+        } else {
+            if (rb->right || rb->color == 0) {
+                rb->right = insert(rb->right, data);
+                rb->right->parent = rb;
+            } else if (rb->color == 1) {
+                rb->right = insert(rb->right, data);
+                rb->right->parent = rb;
+                RBTree *otherChild;
+                if (rb->parent->left == rb)
+                    otherChild = rb->parent->right;
+                else
+                    otherChild = rb->parent->left;
+                fixDRed(rb, rb->parent, otherChild, 2);
+                //2 refers that new element is inserted at right of rb
+            }
+        }
+        return rb;
+    }
+
+    void fixDRed(RBTree *rb, RBTree *par, RBTree *otherChild, int val) {
+        //case 1: the other child of parent is RED
+
+        if (otherChild && otherChild->color == 1) {
+            //we just need to recolor rb,parent,otherChild
+            rb->color = 0;
+            rb->parent->color = 1;
+            otherChild->color = 0;
+            //we might now as well need to check for problem at parent
+            if (par->parent) {
+                if (par->parent->color == 1) {
+                    if (par->parent->left == par)
+                        fixDRed(par, par->parent, par->parent->right, val);
+                    else
+                        fixDRed(par, par->parent, par->parent->left, val);
+                }
+            } else {
+                par->color = 0;
+            }
+        }
+            //case 2: the other child of grandparent is BLACK
+        else {
+            //four cases possible
+
+            //case 1: left left case
+            if (par->left == rb && val == 1)
+                par = rotateRight(par, rb);
+
+                //case 2: right right case
+            else if (par->right == rb && val == 2)
+                par = rotateLeft(par, rb);
+
+                //case 3: left right case
+            else if (par->left == rb && val == 2) {
+                rb = rotateLeft(rb, rb->right);
+                par = rotateRight(par, rb);
+            }
+
+                //case 4: right left case
+            else {
+                rb = rotateRight(rb, rb->left);
+
+                cout << par->right->salary << par->right->right->salary;
+                par = rotateLeft(par, rb);
+            }
+
+            //common for all, swapping colors of rb and par
+            par->color = !par->color;
+            rb->color = !rb->color;
+
+        }
+    }
+
+    RBTree *rotateRight(RBTree *par, RBTree *child) {
+        par->left = child->right;
+        if (par->left)
+            par->left->parent = par;
+        child->right = par;
+        par->parent = child;
+        return child;
+    }
+
+    RBTree *rotateLeft(RBTree *par, RBTree *child) {
+        par->right = child->left;
+        if (par->right)
+            par->right->parent = par;
+        child->left = par;
+        par->parent = child;
+        return child;
+    }
+
+    void inOrder(RBTree *rb) {
+        if (!rb)
+            return;
+        inOrder(rb->left);
+        cout << rb->salary << " ";
+        inOrder(rb->right);
+    }
+};
+
 int main() {
 
-    int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    /*int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     int n = sizeof(a) / sizeof(int);
     binarySearchTree *bst = NULL; // to make sure it is not uninitialized
     insertUsingArr(bst, a, 0, n - 1);
@@ -200,7 +351,15 @@ int main() {
     bst->inOrder();
     bst = bst->remove(bst, 2);
     cout << endl;
-    bst->inOrder();
+    bst->inOrder();*/
+
+    RBTree *very_first_rb = new RBTree(5, 0);
+    very_first_rb = very_first_rb->insert(very_first_rb, 6);
+    very_first_rb = very_first_rb->insert(very_first_rb, 4);
+    very_first_rb = very_first_rb->insert(very_first_rb, 3);
+    very_first_rb = very_first_rb->insert(very_first_rb, 10);
+    very_first_rb = very_first_rb->insert(very_first_rb, 7);
+    very_first_rb->inOrder(very_first_rb);
 
     return 0;
 }

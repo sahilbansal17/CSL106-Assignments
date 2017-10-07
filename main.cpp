@@ -1,3 +1,6 @@
+//submitted by SAHIL 2016CSJ0008
+//reference taken from CH-13 RED BLACK TREES of Intro to Algorithms (Thomas H. Cormen)
+
 #include <iostream>
 #include <fstream>
 #include <queue>
@@ -132,7 +135,7 @@ RB *insert(RB *root, int data) {
     } else { //the case when data is already present in the tree
         x->count++;
     }
-    cout << "\nThe element " << data << " inserted successfully.\n";
+    cout << "\nThe element " << data << " inserted successfully.\n\n";
     return root;
 }
 
@@ -177,7 +180,7 @@ void maxQuery(RB *rb) {
         rb = rb->right;
     }
     cout << "\nThe employee with maximum salary has salary: " << rb->d << "\n";
-    cout << "The number of employee with same salary are: " << rb->count << "\n";
+    cout << "The number of employee with same salary are: " << rb->count << "\n\n";
     return;
 }
 
@@ -187,7 +190,7 @@ void minQuery(RB *rb) {
         rb = rb->left;
     }
     cout << "\nThe employee with minimum salary has salary: " << rb->d << "\n";
-    cout << "The number of employee with same salary are: " << rb->count << "\n";
+    cout << "The number of employee with same salary are: " << rb->count << "\n\n";
     return;
 }
 
@@ -211,6 +214,7 @@ int empInRange(RB *rb, int x, int y) {
     if (rb->d > x && rb->d > y) {
         return empInRange(rb->left, x, y);
     }
+    return 0;
 }
 
 RB *transplant(RB *rb, RB *u, RB *v) {
@@ -290,8 +294,8 @@ RB *fixBlackDepth(RB *rb, RB *x) {
 
         }
         x->c = 'b';
-        return rb;
     }
+    return rb;
 }
 
 RB *deleteRB(RB *rb, int data) {
@@ -312,11 +316,11 @@ RB *deleteRB(RB *rb, int data) {
     if (temp == NULL) {
         //the case when we did not find the required employee, just print the closest salary to his/her salary
         cout << "\nThe salary not found in DB, closest salary is : " << closest_sal_emp->d
-             << " & the no of such employee are : " << closest_sal_emp->count << "\n";
+             << " & the no of such employee are : " << closest_sal_emp->count << "\n\n";
     } else if (temp->count > 1) {
         temp->count--;
         cout << "\nThe employee with same salary " << data << " are " << temp->count + 1
-             << ". So, one employee removed from DB.\n";
+             << ". So, one employee deleted from DB.\n\n";
     } else {
         //the case when we acutally need to delete a node from RB Tree, temp is to be deleted
         struct RB *y = temp; //copy of node to be deleted, useful when swapping with predecessor
@@ -354,7 +358,7 @@ RB *deleteRB(RB *rb, int data) {
             //x is the node whose black depth could have been altered
             if (y_org_color == 'b')rb = fixBlackDepth(rb, x);
         }
-        cout << "\nThe element " << data << " deleted successfully.\n";
+        cout << "\nThe element " << data << " deleted successfully.\n\n";
     }
 
     return rb;
@@ -390,12 +394,12 @@ int main() {
     cout << "\n No of employee in the range 4 to 6 are: " << empInRange(rb, 4, 6) << "\n";*/
 
     string s;
-    cout << "1. \"A x\" to add employee to database.\n";
+    cout << "\n\n1. \"A x\" to add employee to database.\n";
     cout << "2. \"R x\" to delete employee from database.\n";
     cout << "3. \"Q x y\" to return the no of employees having salary in range [x y].\n";
     cout << "4. \"Max\" to return maximum salary.\n";
     cout << "5. \"Min\" to return minimum salary.\n";
-    cout << "\n0. \"0\" to close the program.\n\n";
+    cout << "0. \"0\" to close the program.\n\n";
     cin >> s;
     while (s != "0") {
         if (s == "A" || s=="r") {
@@ -417,7 +421,7 @@ int main() {
         else if(s=="Q" || s=="q"){
             int x,y;
             cin>>x>>y;
-            cout<<"\nQuery answer: "<<empInRange(rb,x,y)<<".\n";
+            cout<<"\nQuery answer: "<<empInRange(rb,x,y)<<".\n\n";
         }
         cin>>s;
     }

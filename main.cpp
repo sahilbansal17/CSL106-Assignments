@@ -1,365 +1,132 @@
 #include <iostream>
+#include <fstream>
 
 using namespace std;
-
-class binarySearchTree {
-private:
-    int salary;
-    binarySearchTree *left;
-    binarySearchTree *right;
-public:
-    binarySearchTree() {
-        salary = -1;
-        left = NULL;
-        right = NULL;
-        return;
-    }
-
-    binarySearchTree(int data) {
-        salary = data;
-        left = NULL;
-        right = NULL;
-    }
-
-    void insert(int data) {
-        binarySearchTree *b = this;
-        if (b ==
-            NULL) { //there's some mistake here since this can never be null, that's why unable to insert the first element
-            b = new binarySearchTree(data);
-        } else
-            while (b) {
-                if (data <= b->salary) {
-                    if (b->left)
-                        b = b->left;
-                    else {
-                        b->left = new binarySearchTree(data);
-                        break;
-                    }
-                } else {
-                    if (b->right)
-                        b = b->right;
-                    else {
-                        b->right = new binarySearchTree(data);
-                        break;
-                    }
-                }
-            }
-    }
-
-    binarySearchTree *insert(binarySearchTree *b, int data) {
-        if (!b) {
-            b = new binarySearchTree(data);
-            return b;
-        }
-        if (data <= b->salary) {
-            b->left = insert(b->left, data);
-        } else {
-            b->right = insert(b->right, data);
-        }
-        return b;
-    }
-
-    void inOrder() {
-        if (!this) //when the BST is null
-            return;
-        if (this->left)
-            this->left->inOrder();
-        cout << this->salary << " ";
-        if (this->right)
-            this->right->inOrder();
-    }
-
-    //still some bugs to be fixed in this
-    void remove(int data) {
-        binarySearchTree *b = this;
-        binarySearchTree *parent = this;
-        while (b) {
-            if (data == b->salary) {
-                break;
-            }
-            parent = b;
-            if (data < b->salary) {
-                b = b->left;
-            } else {
-                b = b->right;
-            }
-        }
-        if (!b) {
-            cout << "\nElement not found.\n";
-        } else {
-            //case 1: the element has no children
-            if (!b->left && !b->right) {
-                if (parent->left == b) {
-                    delete parent->left;
-                    parent->left = NULL;
-                } else if (parent->right == b) {
-                    delete parent->right;
-                    parent->right = NULL;
-                }
-                    //when parent and b are same
-                else {
-                    *b = NULL;
-                }
-            }
-                //case 2: the element has only one child
-            else if (b->left && !b->right) {
-                if (parent->left == b) {
-                    parent->left = b->left;
-                } else if (parent->right == b) {
-                    parent->right = b->left;
-                }
-                    //when parent and b are same
-                else {
-                    parent = parent->left;
-                }
-                delete b;
-            } else if (b->right && !b->left) {
-                if (parent->left == b) {
-                    parent->left = b->right;
-                } else if (parent->right == b) {
-                    parent->right = b->right;
-                } else {
-                    parent = parent->right;
-                }
-                delete b;
-            }
-                //case 3: the element has two children
-            else {
-                //find the predecessor of the element and SWAP b's salary with its salary
-                b->salary = b->predecessor()->salary;
-                b->predecessor()->salary = data;
-                //now we need to delete the predecessor
-                b->predecessor()->remove(data);
-            }
-        }
-    }
-
-    binarySearchTree *predecessor() {
-        binarySearchTree *b = this;
-        b = b->left;
-        while (b->right) {
-            b = b->right;
-        }
-        return b;
-    }
-
-    binarySearchTree *remove(binarySearchTree *b, int data) {
-        binarySearchTree *temp;
-        if (b == NULL) {
-            cout << "Element not present in the BST\n";
-        } else if (data < b->salary) {
-            b->left = remove(b->left, data);
-        } else if (data > b->salary) {
-            b->right = remove(b->right, data);
-        } else {
-            //the case when element is found
-            //case 1: it has two children
-            if (b->left && b->right) {
-                //swap the element with the predecessor
-                temp = b->predecessor();
-                b->salary = temp->salary;
-                //now delete the predecessor
-                b->left = remove(b->left, b->salary);
-            } else {
-                //case 2: it has one child or even no child
-                temp = b;
-                if (b->left == NULL) {
-                    b = b->right;
-                } else if (b->right == NULL) {
-                    b = b->left;
-                }
-                delete temp; //handles both cases
-            }
-        }
-        return b;
-    }
-
+struct RB {
+    int d; //salary
+    char c; //color
+    int count = 0; //count
+    RB *left;
+    RB *right;
+    RB *parent;
 };
 
-void insertUsingArr(binarySearchTree *&b, int a[], int start, int end) {
-    if (start > end)
-        return;
-    int mid = (start + end) / 2;
-    b = b->insert(b, a[mid]);
-    insertUsingArr(b, a, start, mid - 1);
-    insertUsingArr(b, a, mid + 1, end);
+//left Rotation
+void lR(struct RB *&root, struct RB *&x) {
+    struct RB *y = x->right; // set y
+    x->right = y->left; //turn y's left subtree into x's right subtree
+    if (y->left != NULL) {
+        y->left->parent = x;
+    }
+    y->parent = x->parent; //link x's parent to y
+    if (x->parent == NULL) {
+        root = y;
+    } else if (x == x->parent->left) x->parent->left = y;
+    else x->parent->right = y;
+    y->left = x; //put x on y's left
+    x->parent = y;
 }
 
-class RBTree {
-public:
-    int salary;
-    RBTree *left;
-    RBTree *right;
-    RBTree *parent;
-    int color; //0 for BLACK and 1 for RED
-public:
-    RBTree() {
-        salary = 0;
-        left = NULL;
-        right = NULL;
-        parent = NULL;
-        color = 0;
+//right Rotation
+void rR(struct RB *&root, struct RB *&y) {
+    struct RB *x = y->left; //set x
+    y->left = x->right; //turn x's right subtree into y's left subtree
+    if (x->right != NULL) {
+        x->right->parent = y;
     }
+    x->parent = y->parent; //link y's parent to x
+    if (y->parent == NULL) {
+        root = x;
+    } else if (y == y->parent->left)
+        y->parent->left = x; //
+    else
+        y->parent->right = x;
+    x->right = y; //put y on x's right
+    y->parent = x;
+}
 
-    RBTree(int data, int col) {
-        //by default when we insert a node its color is RED
-        salary = data;
-        left = NULL;
-        right = NULL;
-        parent = NULL;
-        color = col;
-    }
-
-    RBTree *insert(RBTree *rb, int data) {
-        if (!rb) {
-            rb = new RBTree(data, 1);
-            /*now it might create a double RED problem if its
-              parent is RED  */
-            return rb;
-
-        }
-        if (data <= rb->salary) {
-            //no new node is created
-            if (rb->left || rb->color == 0) {
-                rb->left = insert(rb->left, data);
-                rb->left->parent = rb;
-            } else if (rb->color == 1) {
-                //the case when a double RED problem occurs
-                rb->left = insert(rb->left, data);
-                rb->left->parent = rb;
-
-                //parent of rb must be BLACK
-                RBTree *otherChild; //otherChild of parent of rb
-                if (rb->parent->left == rb)
-                    otherChild = rb->parent->right;
-                else
-                    otherChild = rb->parent->left;
-                fixDRed(rb, rb->parent, otherChild, 1);
-                //1 refers that new element is inserted at left of rb
+void fixDoubleRed(struct RB *&root, struct RB *&z) {
+    while (z->parent && z->parent->c == 'r') {
+        if (z->parent == z->parent->parent->left) {
+            struct RB *y = z->parent->parent->right; //uncle of z
+            if (y->c == 'r') {
+                //the case when uncle is colored red, simply swap the colors
+                z->parent->c = 'b';
+                y->c = 'b';
+                z->parent->parent->c = 'r';
+                z = z->parent->parent; //its parent now might have a double RED problem
             }
+                //the case when the uncle is colored black , rotations to be done
+            else if (z == z->parent->right) {
+                //the case when left rotation is required
+                lR(root, z);
+            }
+            z->parent->c = 'b';
+            z->parent->parent->c = 'r';
+            rR(root, z->parent->parent);
         } else {
-            if (rb->right || rb->color == 0) {
-                rb->right = insert(rb->right, data);
-                rb->right->parent = rb;
-            } else if (rb->color == 1) {
-                rb->right = insert(rb->right, data);
-                rb->right->parent = rb;
-                RBTree *otherChild;
-                if (rb->parent->left == rb)
-                    otherChild = rb->parent->right;
-                else
-                    otherChild = rb->parent->left;
-                fixDRed(rb, rb->parent, otherChild, 2);
-                //2 refers that new element is inserted at right of rb
+            struct RB *y = z->parent->parent->left; //uncle of z
+            if (y->c == 'r') {
+                //the case when uncle is colored red, simply swap the colors
+                z->parent->c = 'b';
+                y->c = 'b';
+                z->parent->parent->c = 'r';
+                z = z->parent->parent; //its parent now might have a double RED problem
             }
-        }
-        return rb;
-    }
-
-    void fixDRed(RBTree *rb, RBTree *par, RBTree *otherChild, int val) {
-        //case 1: the other child of parent is RED
-
-        if (otherChild && otherChild->color == 1) {
-            //we just need to recolor rb,parent,otherChild
-            rb->color = 0;
-            rb->parent->color = 1;
-            otherChild->color = 0;
-            //we might now as well need to check for problem at parent
-            if (par->parent) {
-                if (par->parent->color == 1) {
-                    if (par->parent->left == par)
-                        fixDRed(par, par->parent, par->parent->right, val);
-                    else
-                        fixDRed(par, par->parent, par->parent->left, val);
-                }
-            } else {
-                par->color = 0;
+                //the case when the uncle is colored black , rotations to be done
+            else if (z == z->parent->left) {
+                //the case when left rotation is required
+                rR(root, z);
             }
-        }
-            //case 2: the other child of grandparent is BLACK
-        else {
-            //four cases possible
-
-            //case 1: left left case
-            if (par->left == rb && val == 1)
-                par = rotateRight(par, rb);
-
-                //case 2: right right case
-            else if (par->right == rb && val == 2)
-                par = rotateLeft(par, rb);
-
-                //case 3: left right case
-            else if (par->left == rb && val == 2) {
-                rb = rotateLeft(rb, rb->right);
-                par = rotateRight(par, rb);
-            }
-
-                //case 4: right left case
-            else {
-                rb = rotateRight(rb, rb->left);
-
-                cout << par->right->salary << par->right->right->salary;
-                par = rotateLeft(par, rb);
-            }
-
-            //common for all, swapping colors of rb and par
-            par->color = !par->color;
-            rb->color = !rb->color;
-
+            z->parent->c = 'b';
+            z->parent->parent->c = 'r';
+            lR(root, z->parent->parent);
         }
     }
+    root->c = 'b';
+}
 
-    RBTree *rotateRight(RBTree *par, RBTree *child) {
-        par->left = child->right;
-        if (par->left)
-            par->left->parent = par;
-        child->right = par;
-        par->parent = child;
-        return child;
+void insert(RB *&root, int data) {
+    struct RB *z = new RB;
+    z->d = data;
+    z->c = 'r';
+    z->parent = z->right = z->left = NULL;
+    z->count = 1;
+    struct RB *x = root; //used to traverse to the right position to insert
+    struct RB *y = NULL; //to store the parent of node to be inserted (z)
+    while (x != NULL && x->d != data) {
+        y = x;
+        if (data < x->d) {
+            x = x->left;
+        } else
+            x = x->right;
     }
-
-    RBTree *rotateLeft(RBTree *par, RBTree *child) {
-        par->right = child->left;
-        if (par->right)
-            par->right->parent = par;
-        child->left = par;
-        par->parent = child;
-        return child;
+    if (x == NULL) {
+        //the case when we need to insert a new node in the tree
+        z->parent = y;
+        if (y == NULL) {
+            root = z;
+        } else if (z->d < y->d) { //if z is to be on left of y
+            y->left = z;
+        } else //if z is to be on right of y
+            y->right = z;
+        fixDoubleRed(root, z); //since z's parent has double red problem
+    } else { //the case when data is already present in the tree
+        x->count++;
     }
-
-    void inOrder(RBTree *rb) {
-        if (!rb)
-            return;
-        inOrder(rb->left);
-        cout << rb->salary << " ";
-        inOrder(rb->right);
-    }
-};
+}
 
 int main() {
+    //ifstream fin;
+    //fin.open("input.txt");
+    //read file and insert n elements into the RB Tree
 
-    /*int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    int n = sizeof(a) / sizeof(int);
-    binarySearchTree *bst = NULL; // to make sure it is not uninitialized
-    insertUsingArr(bst, a, 0, n - 1);
-    bst->inOrder();
-    bst = bst->remove(bst, 5);
-    cout << endl;
-    bst->inOrder();
-    bst = bst->remove(bst, 3);
-    cout << endl;
-    bst->inOrder();
-    bst = bst->remove(bst, 2);
-    cout << endl;
-    bst->inOrder();*/
+    RB *rb = NULL;
+    insert(rb, 15);
+    cout << rb->d;
 
-    RBTree *very_first_rb = new RBTree(5, 0);
-    very_first_rb = very_first_rb->insert(very_first_rb, 6);
-    very_first_rb = very_first_rb->insert(very_first_rb, 4);
-    very_first_rb = very_first_rb->insert(very_first_rb, 3);
-    very_first_rb = very_first_rb->insert(very_first_rb, 10);
-    very_first_rb = very_first_rb->insert(very_first_rb, 7);
-    very_first_rb->inOrder(very_first_rb);
+    //make a menu for user to easily insert/delete elements and make queries
+
 
     return 0;
 }

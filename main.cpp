@@ -5,7 +5,7 @@
 #include <fstream>
 #include <queue>
 #include <climits>
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 struct RB {
@@ -20,16 +20,18 @@ struct RB {
 //left Rotation
 RB *lR(struct RB *root, struct RB *x) {
     struct RB *y = x->right; // set y
-    x->right = y->left; //turn y's left subtree into x's right subtree
-    if (y->left != NULL) {
-        y->left->parent = x;
+    if (y) {
+        x->right = y->left; //turn y's left subtree into x's right subtree
+        if (y->left != NULL) {
+            y->left->parent = x;
+        }
+        y->parent = x->parent; //link x's parent to y
     }
-    y->parent = x->parent; //link x's parent to y
     if (x->parent == NULL) {
         root = y;
     } else if (x == x->parent->left) x->parent->left = y;
     else x->parent->right = y;
-    y->left = x; //put x on y's left
+    if (y) { y->left = x; } //put x on y's left
     x->parent = y;
     return root;
 }
@@ -37,24 +39,27 @@ RB *lR(struct RB *root, struct RB *x) {
 //right Rotation
 RB *rR(struct RB *root, struct RB *y) {
     struct RB *x = y->left; //set x
-    y->left = x->right; //turn x's right subtree into y's left subtree
-    if (x->right != NULL) {
-        x->right->parent = y;
+    if (x) {
+        y->left = x->right; //turn x's right subtree into y's left subtree
+        if (x->right != NULL) {
+            x->right->parent = y;
+        }
+        x->parent = y->parent; //link y's parent to x
     }
-    x->parent = y->parent; //link y's parent to x
     if (y->parent == NULL) {
         root = x;
     } else if (y == y->parent->left)
         y->parent->left = x; //
     else
         y->parent->right = x;
-    x->right = y; //put y on x's right
+    if (x) { x->right = y; } //put y on x's right
     y->parent = x;
     return root;
 }
 
 RB *fixDoubleRed(struct RB *root, struct RB *z) {
     while (z->parent && z->parent->c == 'r') {
+
         if (z->parent == z->parent->parent->left) {
             struct RB *y = z->parent->parent->right; //uncle of z
             if (y && y->c == 'r') {
@@ -67,6 +72,7 @@ RB *fixDoubleRed(struct RB *root, struct RB *z) {
                 //the case when the uncle is colored black , rotations to be done
             else if (z == z->parent->right) {
                 //the case when left rotation is required
+                z = z->parent;
                 root = lR(root, z);
             }
             if (z->parent) {
@@ -77,19 +83,18 @@ RB *fixDoubleRed(struct RB *root, struct RB *z) {
                 }
             }
         } else {
-            if (z->parent->parent) {
-                struct RB *y = z->parent->parent->left; //uncle of z
-                if (y && y->c == 'r') {
-                    //the case when uncle is colored red, simply swap the colors
-                    z->parent->c = 'b';
-                    y->c = 'b';
-                    z->parent->parent->c = 'r';
-                    z = z->parent->parent; //its parent now might have a double RED problem
-                }
+            struct RB *y = z->parent->parent->left; //uncle of z
+            if (y && y->c == 'r') {
+                //the case when uncle is colored red, simply swap the colors
+                z->parent->c = 'b';
+                y->c = 'b';
+                z->parent->parent->c = 'r';
+                z = z->parent->parent; //its parent now might have a double RED problem
             }
                 //the case when the uncle is colored black , rotations to be done
             else if (z == z->parent->left) {
                 //the case when left rotation is required
+                z = z->parent;
                 root = rR(root, z);
             }
             if (z->parent) {
@@ -366,7 +371,7 @@ RB *deleteRB(RB *rb, int data) {
 
 int main() {
     ifstream fin;
-    fin.open("input.txt");
+    fin.open("/Users/sahilbansal/CLionProjects/A3_new/abc.txt");
     //read file and insert n elements into the RB Tree
 
     RB *rb = NULL;
@@ -402,28 +407,24 @@ int main() {
     cout << "0. \"0\" to close the program.\n\n";
     cin >> s;
     while (s != "0") {
-        if (s == "A" || s=="r") {
+        if (s == "A" || s == "r") {
             int x;
             cin >> x;
             rb = insert(rb, x);
-        }
-        else if(s == "R" || s=="r"){
+        } else if (s == "R" || s == "r") {
             int x;
-            cin>>x;
+            cin >> x;
             rb = deleteRB(rb, x);
-        }
-        else if(s== "Max" || s=="max"){
+        } else if (s == "Max" || s == "max") {
             maxQuery(rb);
-        }
-        else if(s=="Min" || s=="min"){
+        } else if (s == "Min" || s == "min") {
             minQuery(rb);
+        } else if (s == "Q" || s == "q") {
+            int x, y;
+            cin >> x >> y;
+            cout << "\nQuery answer: " << empInRange(rb, x, y) << ".\n\n";
         }
-        else if(s=="Q" || s=="q"){
-            int x,y;
-            cin>>x>>y;
-            cout<<"\nQuery answer: "<<empInRange(rb,x,y)<<".\n\n";
-        }
-        cin>>s;
+        cin >> s;
     }
     return 0;
 }

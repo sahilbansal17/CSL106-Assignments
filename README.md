@@ -24,7 +24,6 @@ If a particular customer arrives at time t, the next customer will arrive at tim
 
 #### A new customer will always join the queue [there can be atmost k queues at a time since there are k billing counters] with the least no of customers at that time.
 
-A heap H1 of size k maintains the current no of customers in the queue and the time when services of its current customer will be finished. The topmost node will be the one with the least no of customers in the queue.
+A heap H1 of size k maintains the current no of customers in the queue and the time when services of its current **customers** will be finished. The topmost node will be the one with the least no of customers in the queue.
 
-Another heap H2 of size equal to the no of current customers will contain the customer's queue no, arrival time and the departure time. It will be ordered by departure time (smallest on the top).
->>>>>>> Add readme.md
+Another heap H2 of size equal to the no of current customers will contain the customer's queue no, arrival time and the departure time. It will be ordered by departure time (smallest on the top).>>>>>>> Add readme.md

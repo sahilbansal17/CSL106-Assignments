@@ -1,25 +1,28 @@
 //Assignment 4 - 2016CSJ0008,2016CSJ0013
 #include <iostream>
 #include <random>
+
 using namespace std;
 
 vector<double> arrivalTimeGen(double R, int N) {
     vector<double> temp(N);
-	double m = 1/R;
-    default_random_engine generator;
-    uniform_real_distribution<double> distribution(0.0, m);
+    double m = 1 / R;
+    random_device rd; //non-deterministic engine, to seed mt engine
+    mt19937 gen(rd()); //mersenne-twister engine
+    uniform_real_distribution<double> distribution(0.0, m); //uniform distribution
     for (int i = 0; i < N; i++) {
-        double number = distribution(generator);
+        double number = distribution(gen);
         temp[i] = number;
     }
     return temp;
 }
 
 double serviceTimeGen(double m, double v) {
-    default_random_engine generator;
+    random_device rd;
+    mt19937 gen(rd());
     uniform_real_distribution<double> distribution(m - v, m + v);
-	double number = distribution(generator);
-	return number;
+    double number = distribution(gen);
+    return number;
 }
 
 int main() {
@@ -34,12 +37,17 @@ int main() {
 
     cin >> R >> k >> mu >> sigma >> N;
 
-    vector<double> arrivalTimeVec(N), t2(N);
+    vector<double> arrivalTimeVec(N);
     arrivalTimeVec = arrivalTimeGen(R, N);
-    t2 = arrivalTimeGen(R, N);
     for (int i = 0; i < N; i++) {
-        //arrivalTimeVec[i] = arrivalTimeGen(R);
-        cout << arrivalTimeVec[i] << " " << t2[i] << "\n";
+        cout << arrivalTimeVec[i] << " ";
     }
+    // TESTING THE SERVICE TIME GENERATION FUNCTION
+    /*
+    cout << "\n";
+    for(int i = 0 ; i < N; i++){
+    	cout << serviceTimeGen(mu,sigma) << " ";
+    }
+    */
     return 0;
 }

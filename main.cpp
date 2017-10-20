@@ -45,7 +45,26 @@ public:
 
 //heap 2 - customers   
 class H2 {
+private:
+    int size; // the current no of customers yet to be served
+    Customer *customers;
+public:
+    H2(int N) {
+        customers = new Customer[N]; //at most there can be N customers in the shop
+        for (int i = 0; i < N; i++) {
+            customers[i].queueNo = 0;
+            customers[i].arrivalTime = 0;
+            customers[i].departureTime = 0;
+        }
+        size = 0; //since there are no customers initially
+    }
 
+    void display(int N) {
+        for (int i = 0; i < N; i++) {
+            cout << customers[i].queueNo << " " << customers[i].arrivalTime << " " << customers[i].departureTime
+                 << "\n";
+        }
+    }
 };
 
 //heap 1 - counters
@@ -66,6 +85,8 @@ public:
             cout << counters[i].noOfCustomers << " " << counters[i].ccDepTime << "\n";
         }
     }
+
+
 };
 
 int main() {
@@ -97,6 +118,9 @@ int main() {
 
     H1 heap1(k);
     heap1.display(k);
+
+    H2 heap2(N);
+    heap2.display(N);
 
     return 0;
 }

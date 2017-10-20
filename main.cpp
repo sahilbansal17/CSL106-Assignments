@@ -35,12 +35,36 @@ public:
     int queueNo;
     double arrivalTime;
     double departureTime;
+
+    Customer(Customer &c1) {
+        queueNo = c1.queueNo;
+        arrivalTime = c1.arrivalTime;
+        departureTime = c1.departureTime;
+    }
+
+    Customer() {
+        queueNo = 0;
+        arrivalTime = 0;
+        departureTime = 0;
+    }
 };
 
 class Counter {
 public:
+    int id; 
     int noOfCustomers;
     double ccDepTime; //departure time of its current customer
+    Counter(Counter &c1) {
+        id = c1.id;
+        noOfCustomers = c1.noOfCustomers;
+        ccDepTime = c1.ccDepTime;
+    }
+
+    Counter() {
+        id = 0;
+        noOfCustomers = 0;
+        ccDepTime = 0;
+    }
 };
 
 //heap 2 - customers   
@@ -71,12 +95,53 @@ public:
 class H1 {
 private:
     Counter *counters;
+    int size;
+
+    int leftChild(int i) {
+        int left = 2 * i + 1;
+        if (left >= size)
+            return -1;
+        return left;
+    }
+
+    int rightChild(int i) {
+        int right = 2 * i + 2;
+        if (right >= size) {
+            return -1;
+        }
+        return right;
+    }
+
+    void heapify(int loc) {
+        Counter temp;
+        int l, r, max;
+        l = leftChild(loc);
+        r = rightChild(loc);
+        if (l != -1 && counters[l].noOfCustomers > counters[loc].noOfCustomers) {
+            max = l;
+        } else {
+            max = loc;
+        }
+        if (r != -1 && counters[r].noOfCustomers > counters[loc].noOfCustomers) {
+            max = r;
+        }
+        if (max != loc) {
+            //swap counters[loc] with counters[max]
+            temp = counters[loc];
+            counters[loc] = counters[max];
+            counters[max] = temp;
+        }
+        heapify(max);
+        return;
+    }
 public:
     H1(int k) {
+        size = k;
         counters = new Counter[k];
         for (int i = 0; i < k; i++) {
             counters[i].noOfCustomers = 0;
             counters[i].ccDepTime = 0;
+            counters[i].id = i; //assign a unique id to each counter
         }
     }
 
@@ -86,6 +151,23 @@ public:
         }
     }
 
+    void insert(double arrival, double service) {
+        //if there is no customer in the queue
+        if (counters[0].noOfCustomers == 0) {
+            counters[0].noOfCustomers++;
+            counters[0].ccDepTime = arrival + service;
+            //heapify the counters heap based on the no of customers
+            heapify(0);
+        }
+            //else if there are customers in the queue, then the 0th location will contain the counter which has the least no of customers
+        else {
+            counters[0].noOfCustomers++;
+            counters[0].ccDepTime = counters[0].ccDepTime +
+                                    service; //might need to store the departure time of all the customers in the queue
+            //heapify the counters heap
+            heapify(0);
+        }
+    }
 
 };
 
@@ -116,11 +198,21 @@ int main() {
     cout << "\n";
     serviceTimeVec = serviceTimeGen(mu, sigma, N); //service time vector
 
+    for (int i = 0; i < N; i++) {
+        cout << serviceTimeVec[i] << " ";
+    }
+    cout << "\n";
     H1 heap1(k);
-    heap1.display(k);
+    //heap1.display(k);
 
     H2 heap2(N);
-    heap2.display(N);
+    //heap2.display(N);
 
+    double clock = 0;
+    int currentLoc = 0;
+    /*while(clock != -1){
+        clock+= arrivalTimeVec[currentLoc];
+        heap1.insert(clock, serviceTimeVec[currentLoc]);
+    }*/
     return 0;
 }

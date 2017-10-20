@@ -25,6 +25,29 @@ double serviceTimeGen(double m, double v) {
     return number;
 }
 
+class Customer {
+public:
+    int queueNo;
+    double arrivalTime;
+    double departureTime;
+};
+
+class Counter {
+public:
+    int noOfCustomers;
+    double ccDepTime; //departure time of its current customer
+};
+
+//heap 2 - customers  
+class H2 {
+
+};
+
+//heap 1 - counters
+class H1 {
+
+};
+
 int main() {
 
 #ifndef ONLINE_JUDGE
@@ -35,7 +58,7 @@ int main() {
     double R, mu, sigma; //R : arrival rate, mu: mean, sigma: variance of service time
     int k, N; //k: no of billing counters , N : no of customers
 
-    cin >> R >> k >> mu >> sigma >> N;
+    cin >> R >> mu >> sigma >> k >> N;
 
     vector<double> arrivalTimeVec(N);
     arrivalTimeVec = arrivalTimeGen(R, N);
@@ -49,5 +72,7 @@ int main() {
     	cout << serviceTimeGen(mu,sigma) << " ";
     }
     */
+
+
     return 0;
 }

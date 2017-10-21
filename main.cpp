@@ -298,34 +298,23 @@ int main() {
         arrivalTimeVec[i] = R;
     }*/
 
-    // Testing values:
-    arrivalTimeVec[0] = 0.1;
-    arrivalTimeVec[1] = 0.15;
-    arrivalTimeVec[2] = 0.05;
-    arrivalTimeVec[3] = 0;
-
-    //Need not be shown in the output
+    /* --> Need not be shown in the output
     for (int i = 0; i < N; i++) {
         cout << arrivalTimeVec[i] << " ";
-    }
+    }*/
 
-    cout << "\n";
     serviceTimeVec = serviceTimeGen(mu, sigma, N); //service time vector
 
-    // Testing values:
-    serviceTimeVec[0] = 15.4;
-    serviceTimeVec[1] = 13.2;
-    serviceTimeVec[2] = 14.1;
-    serviceTimeVec[3] = 14.9;
     for (int i = 0; i < N; i++) {
-        cout << serviceTimeVec[i] << " ";
+        cout << serviceTimeVec[i];
+        if (i != N - 1) {
+            cout << " ";
+        }
     }
     cout << "\n";
-    H1 heap1(k);
-    //heap1.display(k);
 
+    H1 heap1(k);
     H2 heap2(N);
-    //heap2.display(N);
 
     double clock = 0, totalWaitingTime = 0, avgWaitingTime;
     int currentLoc = 0;

@@ -35,6 +35,7 @@ public:
     int queueNo;
     double arrivalTime;
     double departureTime;
+    double waitingTime;
 };
 
 class Counter {
@@ -95,6 +96,7 @@ public:
             customers[i].queueNo = 0;
             customers[i].arrivalTime = 0;
             customers[i].departureTime = 0;
+            customers[i].waitingTime = 0;
         }
         size = 0; //since there are no customers initially
     }
@@ -125,17 +127,22 @@ public:
         return customers[0].queueNo;
     }
 
+    double topCustomerWaitTime() {
+        return customers[0].waitingTime;
+    }
     void deleteMin() {
         if (size == 0) { //no customer can be deleted
             customers[0].departureTime = 0;
             customers[0].arrivalTime = 0;
             customers[0].queueNo = 0;
+            customers[0].waitingTime = 0;
             return;
         }
         customers[0] = customers[size - 1];
         customers[size - 1].departureTime = 0;
         customers[size - 1].arrivalTime = 0;
         customers[size - 1].queueNo = 0;
+        customers[size - 1].waitingTime = 0;
         size--;
         //call heapify 
         heapify(0);
@@ -206,12 +213,13 @@ public:
 
     Customer insert(double arrival, double service) {
         int Q_NO = counters[0].id; //counter no
-        double depT;
+        double depT, waitTime;
         //if there is no customer in the queue
         if (counters[0].noOfCustomers == 0) {
             counters[0].noOfCustomers++;
             counters[0].ccDepTime = arrival + service;
             depT = counters[0].ccDepTime;
+            waitTime = 0;
             //heapify the counters heap based on the no of customers
             heapify(0);
         }
@@ -229,8 +237,9 @@ public:
 
             //case 2 : the arrival time is less than the time when service of the current customer will be finished
             counters[0].noOfCustomers++;
+            waitTime = counters[0].ccDepTime - arrival; //markov process 
             counters[0].ccDepTime = counters[0].ccDepTime +
-                                    service; //might need to store the departure time of all the customers in the queue
+                                    service; //might need to store the departure time of all the customers in the queue --> no need
             depT = counters[0].ccDepTime;
             //heapify the counters heap
             heapify(0);
@@ -240,6 +249,7 @@ public:
         c.queueNo = Q_NO;
         c.arrivalTime = arrival;
         c.departureTime = depT;
+        c.waitingTime = waitTime;
         return c;
 
     }
@@ -282,25 +292,31 @@ int main() {
     cin >> R >> mu >> sigma >> k >> N;
 
     vector<double> arrivalTimeVec(N), serviceTimeVec(N);
-    //arrivalTimeVec = arrivalTimeGen(R, N);
-    //assuming that the arrival rate is fixed - for time being, can be changed later 
-    double arrTime = 0;
+    arrivalTimeVec = arrivalTimeGen(R, N);
+    /*assuming that the arrival rate is fixed - for time being, can be changed later 
     for (int i = 0; i < N; i++) {
-        arrivalTimeVec[i] = arrTime;
-        arrTime += R;
-    }
+        arrivalTimeVec[i] = R;
+    }*/
 
+    // Testing values:
+    arrivalTimeVec[0] = 0.1;
+    arrivalTimeVec[1] = 0.15;
+    arrivalTimeVec[2] = 0.05;
+    arrivalTimeVec[3] = 0;
+
+    //Need not be shown in the output
     for (int i = 0; i < N; i++) {
         cout << arrivalTimeVec[i] << " ";
     }
+
     cout << "\n";
     serviceTimeVec = serviceTimeGen(mu, sigma, N); //service time vector
 
-    serviceTimeVec[0] = 5.8;
-    serviceTimeVec[1] = 6.3;
-    serviceTimeVec[2] = 6.9;
-    serviceTimeVec[3] = 3.5;
-    serviceTimeVec[4] = 6.5;
+    // Testing values:
+    serviceTimeVec[0] = 15.4;
+    serviceTimeVec[1] = 13.2;
+    serviceTimeVec[2] = 14.1;
+    serviceTimeVec[3] = 14.9;
     for (int i = 0; i < N; i++) {
         cout << serviceTimeVec[i] << " ";
     }
@@ -311,9 +327,9 @@ int main() {
     H2 heap2(N);
     //heap2.display(N);
 
-    double clock = 0;
+    double clock = 0, totalWaitingTime = 0, avgWaitingTime;
     int currentLoc = 0;
-    while (clock != -1 && currentLoc < N) {
+    while (currentLoc < N) {
         clock+= arrivalTimeVec[currentLoc];
         //case 1: when the clock is larger than the dep time of customer on top of H1
         //keep deleting customers till the dep time of top customer is smaller than clock
@@ -321,6 +337,7 @@ int main() {
             int qn; //to find the correct counter in H1
             //-->call deleteMin till the topCustomerDepTime is smaller than clock
             while (heap2.topCustomerDepTime() < clock && heap2.topCustomerDepTime() != 0) {
+                totalWaitingTime += heap2.topCustomerWaitTime();
                 qn = heap2.topCustomerQueueNo();
                 heap2.deleteMin();
                 //--> we also need to update the queue no in H1 by reducing its no of customers
@@ -331,8 +348,17 @@ int main() {
         heap2.insert(heap1.insert(clock, serviceTimeVec[currentLoc]));
         currentLoc++;
     }
-    //clock += 5;
-    //heap2.insert(heap1.insert(clock,7));
-    heap2.display(N);
+    //heap2.display(N); - still contains customers
+    //still customers may be present in the queue
+    while (heap2.topCustomerDepTime() != 0) {
+        int qn; //to find the correct counter in H1
+        qn = heap2.topCustomerQueueNo();
+        totalWaitingTime += heap2.topCustomerWaitTime();
+        heap2.deleteMin();
+        //--> we also need to update the queue no in H1 by reducing its no of customers
+        heap1.updateHeap(qn);
+    }
+    avgWaitingTime = (totalWaitingTime) / N;
+    cout << avgWaitingTime;
     return 0;
 }

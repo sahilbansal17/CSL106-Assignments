@@ -281,10 +281,10 @@ public:
 
 int main() {
 
-#ifndef ONLINE_JUDGE
+/*#ifndef ONLINE_JUDGE
     freopen("input.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
-#endif
+#endif*/
 
     double R, mu, sigma; //R : arrival rate, mu: mean, sigma: variance of service time
     int k, N; //k: no of billing counters , N : no of customers

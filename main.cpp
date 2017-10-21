@@ -126,7 +126,16 @@ public:
     }
 
     void deleteMin() {
+        if (size == 0) { //no customer can be deleted
+            customers[0].departureTime = 0;
+            customers[0].arrivalTime = 0;
+            customers[0].queueNo = 0;
+            return;
+        }
         customers[0] = customers[size - 1];
+        customers[size - 1].departureTime = 0;
+        customers[size - 1].arrivalTime = 0;
+        customers[size - 1].queueNo = 0;
         size--;
         //call heapify 
         heapify(0);
@@ -247,6 +256,9 @@ public:
         //id contains the index at which we need to update the noOfCustomers
         counters[id].noOfCustomers--;
         int noc = counters[id].noOfCustomers;
+        if (noc == 0) {
+            counters[id].ccDepTime = 0; //no more customers in the queue
+        }
         Counter c = counters[id];
         //parent is at (id-1)/2 since starting from 0th index
         while (id > 0 && noc < counters[(id - 1) / 2].noOfCustomers) {
@@ -308,19 +320,19 @@ int main() {
         if (clock > heap2.topCustomerDepTime()) {
             int qn; //to find the correct counter in H1
             //-->call deleteMin till the topCustomerDepTime is smaller than clock
-            while (heap2.topCustomerDepTime() < clock) {
+            while (heap2.topCustomerDepTime() < clock && heap2.topCustomerDepTime() != 0) {
                 qn = heap2.topCustomerQueueNo();
                 heap2.deleteMin();
                 //--> we also need to update the queue no in H1 by reducing its no of customers
                 heap1.updateHeap(qn);
             }
         }
-            //otherwise simply generate a node from H1 and insert in H2
-        else {
-            heap2.insert(heap1.insert(clock, serviceTimeVec[currentLoc]));
-        }
+        //now simply generate a node from H1 and insert in H2
+        heap2.insert(heap1.insert(clock, serviceTimeVec[currentLoc]));
         currentLoc++;
     }
-    heap1.display(k);
+    //clock += 5;
+    //heap2.insert(heap1.insert(clock,7));
+    heap2.display(N);
     return 0;
 }
